@@ -128,7 +128,7 @@ endif
 
 # Crazyflie sources
 VPATH += $(CRAZYFLIE_BASE)/src/init $(CRAZYFLIE_BASE)/src/hal/src $(CRAZYFLIE_BASE)/src/modules/src $(CRAZYFLIE_BASE)/src/modules/src/lighthouse $(CRAZYFLIE_BASE)/src/modules/src/kalman_core $(CRAZYFLIE_BASE)/src/utils/src $(CRAZYFLIE_BASE)/src/drivers/bosch/src $(CRAZYFLIE_BASE)/src/drivers/src $(CRAZYFLIE_BASE)/src/platform
-VPATH += $(CRAZYFLIE_BASE)/src/utils/src/kve
+VPATH += $(CRAZYFLIE_BASE)/src/utils/src/kve $(CRAZYFLIE_BASE)/src/rust
 
 ############### Source files configuration ################
 
@@ -146,6 +146,9 @@ PROJ_OBJ += bmi055_accel.o bmi055_gyro.o bmi160.o bmp280.o bstdr_comm_support.o 
 PROJ_OBJ += bmi088_accel.o bmi088_gyro.o bmi088_fifo.o bmp3.o
 PROJ_OBJ += pca9685.o vl53l0x.o pca95x4.o pca9555.o vl53l1x.o pmw3901.o
 PROJ_OBJ += amg8833.o lh_bootloader.o
+
+# Rust FreeRTOS shim (freertos.rs crate)
+PROJ_OBJ += freertos_rs.o
 
 # USB Files
 PROJ_OBJ += usb_bsp.o usblink.o usbd_desc.o usb.o
