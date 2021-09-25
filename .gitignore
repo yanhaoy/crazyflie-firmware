@@ -25,3 +25,9 @@ current_platform.mk
 /docs/.jekyll-metadata
 docs/.jekyll-cache
 docs/api
+
+include/generated/*.h
+include/config/*.conf
+**/*.o
+**/*.cmd
+*.elf
