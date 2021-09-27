@@ -27,7 +27,8 @@ docs/.jekyll-cache
 docs/api
 
 include/generated/*.h
-include/config/*.conf
+include/config/**
 **/*.o
 **/*.cmd
+**/*.a
 *.elf

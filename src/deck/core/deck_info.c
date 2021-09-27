@@ -37,7 +37,7 @@
 #include "debug.h"
 #include "static_mem.h"
 
-#ifdef DEBUG
+#ifdef CONFIG_DEBUG
   #define DECK_INFO_DBG_PRINT(fmt, ...)  DEBUG_PRINT(fmt, ## __VA_ARGS__)
 #else
   #define DECK_INFO_DBG_PRINT(...)
@@ -201,7 +201,7 @@ static void enumerateDecks(void)
         deckInfos[i].driver = findDriver(&deckInfos[i]);
         printDeckInfo(&deckInfos[i]);
       } else {
-#ifdef DEBUG
+#ifdef CONFIG_DEBUG
         DEBUG_PRINT("Deck %i has corrupt OW memory. "
                     "Ignoring the deck in DEBUG mode.\n", i);
         deckInfos[i].driver = &dummyDriver;
