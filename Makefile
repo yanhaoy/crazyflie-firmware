@@ -23,7 +23,6 @@ FREERTOS = $(srctree)/vendor/FreeRTOS
 PORT = $(FREERTOS)/portable/GCC/ARM_CM4F
 LIB = $(srctree)/src/lib
 PROCESSOR = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
-PROG = cf2
 LINKER_DIR = $(srctree)/tools/make/F405/linker
 
 LDFLAGS += --specs=nosys.specs --specs=nano.specs $(PROCESSOR)
@@ -57,22 +56,19 @@ objs-y += vendor
 # This is for building libmath_arm.a
 libs-y += vendor
 
-PLATFORM  ?= cf2
-PROG ?= $(PLATFORM)
-
 MEM_SIZE_FLASH_K = 1008
 MEM_SIZE_RAM_K = 128
 MEM_SIZE_CCM_K = 64
 
 -include include/config/auto.conf
 
-ifeq ($(CONFIG_PLATFORM_CF2),y)
-PLATFORM="CF2 platform"
+ifeq ($(CONFIG_PLATFORM_TAG),y)
+PLATFORM = tag
+all: tag_config
 endif
 
-ifeq ($(CONFIG_PLATFORM_TAG),y)
-PLATFORM="Tag platform"
-endif
+PLATFORM  ?= cf2
+PROG ?= $(PLATFORM)
 
 ifdef CONFIG_DEBUG
 ARCH_CFLAGS	+= -Os -Wconversion
@@ -84,6 +80,9 @@ all: src/utils/src/version.c $(PROG).hex $(PROG).bin
 	@echo "Build for the $(PLATFORM)!"
 	@$(PYTHON) $(srctree)/tools/make/versionTemplate.py --crazyflie-base $(srctree) --print-version
 	@$(PYTHON) $(srctree)/tools/make/size.py $(SIZE) $(PROG).elf $(MEM_SIZE_FLASH_K) $(MEM_SIZE_RAM_K) $(MEM_SIZE_CCM_K)
+
+tag_config:
+	$(MAKE) tag_defconfig
 
 include tools/make/targets.mk
 
