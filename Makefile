@@ -70,10 +70,10 @@ endif
 PLATFORM  ?= cf2
 PROG ?= $(PLATFORM)
 
-ifdef CONFIG_DEBUG
-ARCH_CFLAGS	+= -Os -Wconversion
+ifeq ($(CONFIG_DEBUG),y)
+ARCH_CFLAGS	+= -O0 -Wconversion
 else
-ARCH_CFLAGS   += -Os -Werror
+ARCH_CFLAGS += -Os -Werror
 endif
 
 all: src/utils/src/version.c $(PROG).hex $(PROG).bin
