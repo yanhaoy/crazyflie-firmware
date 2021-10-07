@@ -53,6 +53,9 @@ INCLUDES += -I$(srctree)/include/generated
 objs-y += src
 objs-y += vendor
 
+objs-y += app_api
+objs-y += examples
+
 # This is for building libmath_arm.a
 libs-y += vendor
 

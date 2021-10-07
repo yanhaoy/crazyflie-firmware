@@ -116,4 +116,4 @@ jobs:
         submodules: true
 
     - name: build
-      run: docker run --rm -v ${PWD}:/module bitcraze/builder bash -c "cd ${EXAMPLE}; make -j$(nproc)"
+      run: docker run --rm -v ${PWD}:/module bitcraze/builder bash -c "./scripts/kconfig/merge_config.sh ${EXAMPLE}/config configs/defconfig && make -j 12"

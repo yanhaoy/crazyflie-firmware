@@ -84,3 +84,9 @@ config DECK_FORCE
 endmenu
 
 source "src/modules/src/Kconfig"
+
+menu "App layer configuration"
+source "app_api/Kconfig"
+source "examples/Kconfig"
+
+endmenu
