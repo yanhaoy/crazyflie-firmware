@@ -79,7 +79,7 @@ else
 ARCH_CFLAGS += -Os -Werror
 endif
 
-all: src/utils/src/version.c $(PROG).hex $(PROG).bin
+all: $(PROG).hex $(PROG).bin
 	@echo "Build for the $(PLATFORM)!"
 	@$(PYTHON) $(srctree)/tools/make/versionTemplate.py --crazyflie-base $(srctree) --print-version
 	@$(PYTHON) $(srctree)/tools/make/size.py $(SIZE) $(PROG).elf $(MEM_SIZE_FLASH_K) $(MEM_SIZE_RAM_K) $(MEM_SIZE_CCM_K)
@@ -154,7 +154,3 @@ check_submodules:
 
 # Give control over to Kbuild
 -include Makefile.kbuild
-
-# Some special handling for the version c.file
-src/utils/src/version.c: src/utils/src/version.vtpl
-	$(PYTHON) $(srctree)/tools/make/versionTemplate.py --crazyflie-base $(srctree) $< $@
