@@ -46,6 +46,8 @@ void stabilizerInit(StateEstimatorType estimator);
  */
 bool stabilizerTest(void);
 
+state_t *stabilizerGetState();
+
 /**
  * Enable emergency stop, will shut-off energy to the motors.
  */

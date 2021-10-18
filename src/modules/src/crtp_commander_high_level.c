@@ -55,6 +55,7 @@ such as: take-off, landing, polynomial trajectories.
 #include "param.h"
 #include "static_mem.h"
 #include "mem.h"
+#include "stabilizer.h"
 
 // Local types
 enum TrajectoryLocation_e {
@@ -418,6 +419,9 @@ int takeoff(const struct data_takeoff* data)
 int takeoff2(const struct data_takeoff_2* data)
 {
   int result = 0;
+
+  crtpCommanderHighLevelTellState(stabilizerGetState());
+
   if (isInGroup(data->groupMask)) {
     xSemaphoreTake(lockTraj, portMAX_DELAY);
     float t = usecTimestamp() / 1e6;

@@ -147,6 +147,10 @@ static void compressState()
   stateCompressed.rateYaw = sensorData.gyro.z * deg2millirad;
 }
 
+state_t *stabilizerGetState() {
+  return &state;
+}
+
 static void compressSetpoint()
 {
   setpointCompressed.x = setpoint.position.x * 1000.0f;
