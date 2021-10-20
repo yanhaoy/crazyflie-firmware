@@ -75,11 +75,13 @@ config SENSORS_BOSCH
 
 endmenu
 
-menu "Deck configuration"
+menu "Expansion deck configuration"
 
 config DECK_FORCE
-    string "Force a deck"
+    string "Force loading of a deck driver"
     default ""
+
+source src/deck/drivers/src/Kconfig
 
 endmenu
 
