@@ -97,6 +97,60 @@ config DECK_LOCO
       on-board of the Crazyflie and there is no need for an external
       computer for position estimation.
 
+choice
+  prompt "Algorithm to use"
+  depends on DECK_LOCO
+  default DECK_LOCO_ALGORITHM_AUTO
+
+  config DECK_LOCO_ALGORITHM_AUTO
+    bool "Let the system decide for you"
+
+  config DECK_LOCO_ALGORITHM_TWR
+    bool "Use the Two Way Ranging algorithm"
+
+  config DECK_LOCO_ALGORITHM_TDOA2
+    bool "Use the Time Difference of Arrival (2) algorithm"
+
+  config DECK_LOCO_ALGORITHM_TDOA3
+    bool "Use the Time Difference of Arrival (3) algorithm"
+endchoice
+
+config DECK_LOCO_FULL_TX_POWER
+  bool "Full TX power"
+  default n
+
+config DECK_LOCO_LONGER_RANGE
+  bool "Longer range mode"
+  depends on DECK_LOCO_ALGORITHM_TDOA3
+  default n
+  help
+    Note that anchors need to be built with support for this as well
+
+config DECK_LOCO_TDMA
+  bool "Use Time Division Multiple Access"
+  depends on DECK_LOCO_ALGORITHM_TWR
+  default n
+
+config DECK_LOCO_TDMA_SLOTS
+  int "Number of slots bits for TDMA"
+  depends on DECK_LOCO_TDMA
+  default 1
+
+config DECK_LOCO_TDMA_SLOT
+  int "TDMA slot"
+  depends on DECK_LOCO_TDMA
+  default 0
+
+config DECK_LOCO_2D_POSITION
+  bool "If set we assume we are doing 2D positioning"
+  depends on DECK_LOCO && (DECK_LOCO_ALGORITHM_TDOA3 || DECK_LOCO_ALGORITHM_TDOA2)
+  default n
+
+config DECK_LOCO_2D_POSITION_HEIGHT
+  string "The height (Z) that the tag will be located at"
+  depends on DECK_LOCO_2D_POSITION
+  default 1.2
+
 config DECK_MULTIRANGER
     bool "Support the Multi-ranger deck"
     default y

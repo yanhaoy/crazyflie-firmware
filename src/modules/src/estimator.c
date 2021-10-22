@@ -204,7 +204,7 @@ void estimatorEnqueue(const measurement_t *measurement) {
       eventTrigger(&eventTrigger_estTOF);
       break;
     case MeasurementTypeAbsoluteHeight:
-      // no payload needed, see LPS_2D_POSITION_HEIGHT
+      // no payload needed, see CONFIG_DECK_LOCO_2D_POSITION
       eventTrigger(&eventTrigger_estAbsoluteHeight);
       break;
     case MeasurementTypeFlow:
