@@ -239,7 +239,10 @@ void uart2SendDataDmaBlocking(uint32_t size, uint8_t* data)
 
 int uart2Putchar(int ch)
 {
-    uart2SendData(1, (uint8_t *)&ch);
+  // uart2SendData(1, (uint8_t *)&ch);
+
+  // workaround; avoid spin loop that blocks other tasks from running
+  uart2SendDataDmaBlocking(1, (uint8_t *)&ch);
 
     return (unsigned char)ch;
 }
