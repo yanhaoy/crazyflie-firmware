@@ -33,3 +33,5 @@
 
 #include "esp_slip.h"
 
+
+void espblInit();

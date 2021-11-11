@@ -40,3 +40,17 @@
 #include "uart2.h"
 #include "esp_rom_bootloader.h"
 #include "esp_slip.h"
+
+void espblInit()
+{
+    pinMode(DECK_GPIO_IO1, OUTPUT);
+    digitalWrite(DECK_GPIO_IO1, LOW);
+    pinMode(DECK_GPIO_IO4, OUTPUT);
+    digitalWrite(DECK_GPIO_IO4, LOW);
+    vTaskDelay(10);
+    digitalWrite(DECK_GPIO_IO4, HIGH);
+    pinMode(DECK_GPIO_IO4, INPUT_PULLUP);
+    vTaskDelay(100);
+    digitalWrite(DECK_GPIO_IO1, HIGH);
+    pinMode(DECK_GPIO_IO1, INPUT_PULLUP);
+}
