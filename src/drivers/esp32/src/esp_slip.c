@@ -97,3 +97,14 @@ static void espblAssembleBuffer(esp_uart_send_packet *sender_pckt)
 
     sendBuffer[9 + sender_pckt->data_size] = 0xC0;
 }
+
+static void clearUart2Buffer(coms_getDataWithTimeout_t getDataWithTimeout)
+{
+    uint8_t c;
+    bool success = true;
+    while (success)
+    {
+        success = getDataWithTimeout(&c, 1);
+    }
+    return;
+}
