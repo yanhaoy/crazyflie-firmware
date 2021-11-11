@@ -74,3 +74,5 @@ typedef struct
     uint8_t status;
     uint8_t error;
 } __attribute__((packed)) esp_uart_receive_packet;
+
+bool espblExchange(esp_uart_receive_packet *receiver_pckt, esp_uart_send_packet *sender_pckt, coms_putchar_t putchar, coms_getDataWithTimeout_t getDataWithTimeout, uint32_t timeout_ticks);

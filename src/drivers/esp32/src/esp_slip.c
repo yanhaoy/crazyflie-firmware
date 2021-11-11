@@ -294,3 +294,13 @@ static void clearUart2Buffer(coms_getDataWithTimeout_t getDataWithTimeout)
     }
     return;
 }
+
+bool espblExchange(esp_uart_receive_packet *receiver_pckt, esp_uart_send_packet *sender_pckt, coms_putchar_t putchar, coms_getDataWithTimeout_t getDataWithTimeout, uint32_t timeout_ticks)
+{
+    clearUart2Buffer(getDataWithTimeout);
+    espblAssembleBuffer(sender_pckt);
+
+    sendSLIPPacket(sendSize, sendBuffer, putchar);
+
+    return espblReceivePacket(receiver_pckt, sender_pckt, getDataWithTimeout, timeout_ticks);
+}
