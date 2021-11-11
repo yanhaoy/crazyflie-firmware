@@ -82,3 +82,20 @@ bool espblSync()
 
     return sync;
 }
+
+bool spiAttach()
+{
+    sender_pckt.command = SPI_ATTACH;
+    sender_pckt.data_size = 0x4;
+    sender_pckt.data[0] = 0x00;
+    sender_pckt.data[1] = 0x00;
+    sender_pckt.data[2] = 0x00;
+    sender_pckt.data[3] = 0x00;
+    sender_pckt.data[4] = 0x00;
+    sender_pckt.data[5] = 0x00;
+    sender_pckt.data[6] = 0x00;
+    sender_pckt.data[7] = 0x00;
+
+    return espblExchange(&receiver_pckt, &sender_pckt, uart2Putchar, uart2GetDataWithTimeout, 100);
+}
+

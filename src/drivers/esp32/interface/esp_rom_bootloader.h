@@ -39,4 +39,6 @@
 
 bool espblSync();
 
+bool spiAttach();
+
 void espblInit();
