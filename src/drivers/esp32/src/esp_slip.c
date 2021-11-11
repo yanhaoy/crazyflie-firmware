@@ -44,6 +44,26 @@ static uint8_t generateChecksum(esp_uart_send_packet *sender_pckt)
     return checksum;
 }
 
+static void sendSLIPPacket(uint32_t size, uint8_t *data, coms_putchar_t putCharFnc)
+{
+    uint32_t i;
+
+    for (i = 0; i < size; i++)
+    {
+        if ((data[i] == 0xC0 && i != 0 && i != size - 1) || (data[i] == 0xDB && i != 0 && i != size - 1))
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                j == 0 ? putCharFnc(0xDB) : data[i] == 0xC0 ? putCharFnc(0xDC)
+                                                            : putCharFnc(0xDD);
+            }
+        }
+        else
+        {
+            putCharFnc(data[i]);
+        }
+    }
+}
 static void espblAssembleBuffer(esp_uart_send_packet *sender_pckt)
 {
     sendSize = sender_pckt->data_size + ESP_OVERHEAD_LEN + 2;
