@@ -37,4 +37,6 @@
 #define ESP_PARTITION_ADDRESS 0x8000
 #define ESP_FW_ADDRESS 0x10000
 
+bool espblSync();
+
 void espblInit();

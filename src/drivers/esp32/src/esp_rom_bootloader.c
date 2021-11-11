@@ -57,3 +57,28 @@ void espblInit()
     digitalWrite(DECK_GPIO_IO1, HIGH);
     pinMode(DECK_GPIO_IO1, INPUT_PULLUP);
 }
+
+bool espblSync()
+{
+    sender_pckt.command = SYNC;
+    sender_pckt.data_size = 0x24;
+    sender_pckt.data[0] = 0x07;
+    sender_pckt.data[1] = 0x07;
+    sender_pckt.data[2] = 0x12;
+    sender_pckt.data[3] = 0x20;
+    for (int i = 0; i < 32; i++)
+    {
+        sender_pckt.data[4 + i] = 0x55;
+    }
+
+    bool sync = false;
+    for (int i = 0; i < 10 && !sync; i++) // maximum 10 sync attempts
+    {
+        sync = espblExchange(&receiver_pckt, &sender_pckt, uart2Putchar, uart2GetDataWithTimeout, 100);
+    }
+
+    // ESP32 responds multiple times upon succesful SYNC. Wait until all responses are received, so they can be cleared before next transmission.
+    vTaskDelay(M2T(100));
+
+    return sync;
+}
