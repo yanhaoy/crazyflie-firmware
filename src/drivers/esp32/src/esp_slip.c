@@ -31,6 +31,9 @@
 
 #define ESP_OVERHEAD_LEN 8
 
+static uint8_t sendBuffer[ESP_MTU + 10 + 16];
+static uint32_t sendSize;
+
 static uint8_t generateChecksum(esp_uart_send_packet *sender_pckt)
 {
     uint8_t checksum = 0xEF; // seed
@@ -39,4 +42,38 @@ static uint8_t generateChecksum(esp_uart_send_packet *sender_pckt)
         checksum ^= sender_pckt->data[16 + i];
     }
     return checksum;
+}
+
+static void espblAssembleBuffer(esp_uart_send_packet *sender_pckt)
+{
+    sendSize = sender_pckt->data_size + ESP_OVERHEAD_LEN + 2;
+
+    sendBuffer[0] = 0xC0;
+    sendBuffer[1] = DIR_CMD;
+    sendBuffer[2] = sender_pckt->command;
+    sendBuffer[3] = (uint8_t)((sender_pckt->data_size >> 0) & 0x000000FF);
+    sendBuffer[4] = (uint8_t)((sender_pckt->data_size >> 8) & 0x000000FF);
+
+    if (sender_pckt->command == FLASH_DATA) // or MEM_DATA
+    {
+        uint32_t checksum = (uint32_t)generateChecksum(sender_pckt);
+        sendBuffer[5] = (uint8_t)((checksum >> 0) & 0x000000FF);
+        sendBuffer[6] = (uint8_t)((checksum >> 8) & 0x000000FF);
+        sendBuffer[7] = (uint8_t)((checksum >> 16) & 0x000000FF);
+        sendBuffer[8] = (uint8_t)((checksum >> 24) & 0x000000FF);
+    }
+    else
+    {
+        sendBuffer[5] = 0x00;
+        sendBuffer[6] = 0x00;
+        sendBuffer[7] = 0x00;
+        sendBuffer[8] = 0x00;
+    }
+
+    if (sender_pckt->data_size)
+    {
+        memcpy(&sendBuffer[9], sender_pckt->data, sender_pckt->data_size);
+    }
+
+    sendBuffer[9 + sender_pckt->data_size] = 0xC0;
 }
