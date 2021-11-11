@@ -41,6 +41,9 @@
 #include "esp_rom_bootloader.h"
 #include "esp_slip.h"
 
+static esp_uart_send_packet sender_pckt;
+static esp_uart_receive_packet receiver_pckt;
+
 void espblInit()
 {
     pinMode(DECK_GPIO_IO1, OUTPUT);
