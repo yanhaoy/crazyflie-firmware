@@ -30,3 +30,5 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#define ESP_MTU 4000
