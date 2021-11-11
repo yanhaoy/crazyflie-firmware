@@ -30,3 +30,13 @@
 #include "esp_slip.h"
 
 #define ESP_OVERHEAD_LEN 8
+
+static uint8_t generateChecksum(esp_uart_send_packet *sender_pckt)
+{
+    uint8_t checksum = 0xEF; // seed
+    for (int i = 0; i < sender_pckt->data_size - 16; i++)
+    {
+        checksum ^= sender_pckt->data[16 + i];
+    }
+    return checksum;
+}
