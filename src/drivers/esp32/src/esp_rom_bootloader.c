@@ -99,3 +99,73 @@ bool spiAttach()
     return espblExchange(&receiver_pckt, &sender_pckt, uart2Putchar, uart2GetDataWithTimeout, 100);
 }
 
+bool espblFlashBegin(uint32_t number_of_data_packets, uint32_t firmware_size, uint32_t flash_offset)
+{
+    sender_pckt.command = FLASH_BEGIN;
+    sender_pckt.data_size = 0x10;
+    sender_pckt.data[0] = (uint8_t)((firmware_size >> 0) & 0x000000FF);
+    sender_pckt.data[1] = (uint8_t)((firmware_size >> 8) & 0x000000FF);
+    sender_pckt.data[2] = (uint8_t)((firmware_size >> 16) & 0x000000FF);
+    sender_pckt.data[3] = (uint8_t)((firmware_size >> 24) & 0x000000FF);
+
+    sender_pckt.data[4] = (uint8_t)((number_of_data_packets >> 0) & 0x000000FF);
+    sender_pckt.data[5] = (uint8_t)((number_of_data_packets >> 8) & 0x000000FF);
+    sender_pckt.data[6] = (uint8_t)((number_of_data_packets >> 16) & 0x000000FF);
+    sender_pckt.data[7] = (uint8_t)((number_of_data_packets >> 24) & 0x000000FF);
+
+    sender_pckt.data[8] = (uint8_t)((ESP_MTU >> 0) & 0x000000FF);
+    sender_pckt.data[9] = (uint8_t)((ESP_MTU >> 8) & 0x000000FF);
+    sender_pckt.data[10] = (uint8_t)((ESP_MTU >> 16) & 0x000000FF);
+    sender_pckt.data[11] = (uint8_t)((ESP_MTU >> 24) & 0x000000FF);
+    sender_pckt.data[12] = (uint8_t)((flash_offset >> 0) & 0x000000FF);
+    sender_pckt.data[13] = (uint8_t)((flash_offset >> 8) & 0x000000FF);
+    sender_pckt.data[14] = (uint8_t)((flash_offset >> 16) & 0x000000FF);
+    sender_pckt.data[15] = (uint8_t)((flash_offset >> 24) & 0x000000FF);
+
+    return espblExchange(&receiver_pckt, &sender_pckt, uart2Putchar, uart2GetDataWithTimeout, 10000);
+}
+
+bool espblFlashData(uint8_t *esp_fw, uint32_t flash_data_size, uint32_t sequence_number)
+{
+    sender_pckt.command = FLASH_DATA;
+    sender_pckt.data_size = ESP_MTU + 16; // set data size to the data size including the additional header
+
+    sender_pckt.data[0] = (uint8_t)((ESP_MTU >> 0) & 0x000000FF);
+    sender_pckt.data[1] = (uint8_t)((ESP_MTU >> 8) & 0x000000FF);
+    sender_pckt.data[2] = (uint8_t)((ESP_MTU >> 16) & 0x000000FF);
+    sender_pckt.data[3] = (uint8_t)((ESP_MTU >> 24) & 0x000000FF);
+
+    sender_pckt.data[4] = (uint8_t)((sequence_number >> 0) & 0x000000FF);
+    sender_pckt.data[5] = (uint8_t)((sequence_number >> 8) & 0x000000FF);
+    sender_pckt.data[6] = (uint8_t)((sequence_number >> 16) & 0x000000FF);
+    sender_pckt.data[7] = (uint8_t)((sequence_number >> 24) & 0x000000FF);
+
+    sender_pckt.data[8] = 0x00;
+    sender_pckt.data[9] = 0x00;
+    sender_pckt.data[10] = 0x00;
+    sender_pckt.data[11] = 0x00;
+    sender_pckt.data[12] = 0x00;
+    sender_pckt.data[13] = 0x00;
+    sender_pckt.data[14] = 0x00;
+    sender_pckt.data[15] = 0x00;
+
+    memcpy(&sender_pckt.data[16], esp_fw, flash_data_size);
+    if (flash_data_size < ESP_MTU)
+    {
+        // pad the data with 0xFF
+        memset(&sender_pckt.data[16 + flash_data_size], 0xFF, ESP_MTU - flash_data_size);
+    }
+    return espblExchange(&receiver_pckt, &sender_pckt, uart2Putchar, uart2GetDataWithTimeout, 100);
+}
+
+
+bool espblFlashWrite(uint8_t *esp_fw, uint32_t esp_fw_size, uint32_t sequence_number)
+{
+    if (!espblFlashData(esp_fw, esp_fw_size, sequence_number))
+    {
+        DEBUG_PRINT("Failed to flash page %lu\n", sequence_number);
+        return 0;
+    }
+    return 1;
+}
+
