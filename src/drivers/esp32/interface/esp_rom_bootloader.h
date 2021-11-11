@@ -33,5 +33,8 @@
 
 #include "esp_slip.h"
 
+#define ESP_BOOTLOADER_ADDRESS 0x1000
+#define ESP_PARTITION_ADDRESS 0x8000
+#define ESP_FW_ADDRESS 0x10000
 
 void espblInit();
