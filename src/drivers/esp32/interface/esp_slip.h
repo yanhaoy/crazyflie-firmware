@@ -44,3 +44,23 @@
 #define READ_FLASH 0xd2
 #define CHANGE_BAUDRATE 0x0f
 #define SPI_ATTACH 0x0d
+
+typedef struct
+{
+    uint8_t direction;
+    uint8_t command;
+    uint16_t data_size;
+    uint32_t checksum;
+    uint8_t data[ESP_MTU + 16];
+} __attribute__((packed)) esp_uart_send_packet;
+
+typedef struct
+{
+    uint8_t direction;
+    uint8_t command;
+    uint16_t data_size;
+    uint32_t value; // only for READ_REG command
+    uint8_t data[ESP_MTU + 16];
+    uint8_t status;
+    uint8_t error;
+} __attribute__((packed)) esp_uart_receive_packet;
