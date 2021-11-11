@@ -28,3 +28,5 @@
 
 #include <string.h>
 #include "esp_slip.h"
+
+#define ESP_OVERHEAD_LEN 8
