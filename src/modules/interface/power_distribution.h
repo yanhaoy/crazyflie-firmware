@@ -30,7 +30,7 @@
 
 void powerDistributionInit(void);
 bool powerDistributionTest(void);
-void powerDistribution(const control_t *control);
+void powerDistribution(const control_t *control, setpoint_t *setpoint, const sensorData_t *sensorData, const state_t *state);
 void powerStop();
 
 

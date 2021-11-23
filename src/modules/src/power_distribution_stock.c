@@ -34,6 +34,10 @@
 #include "platform.h"
 #include "motors.h"
 #include "debug.h"
+#include "position_controller.h"
+#include <math.h>
+
+long long count = 0;
 
 static bool motorSetEnable = false;
 
@@ -81,53 +85,107 @@ void powerStop()
   motorsSetRatio(MOTOR_M4, 0);
 }
 
-void powerDistribution(const control_t *control)
+void powerDistribution(const control_t *control, setpoint_t *setpoint, const sensorData_t *sensorData, const state_t *state)
 {
-  #ifdef QUAD_FORMATION_X
-    int16_t r = control->roll / 2.0f;
-    int16_t p = control->pitch / 2.0f;
-    motorPower.m1 = limitThrust(control->thrust - r + p + control->yaw);
-    motorPower.m2 = limitThrust(control->thrust - r - p - control->yaw);
-    motorPower.m3 =  limitThrust(control->thrust + r - p + control->yaw);
-    motorPower.m4 =  limitThrust(control->thrust + r + p - control->yaw);
-  #else // QUAD_FORMATION_NORMAL
-    motorPower.m1 = limitThrust(control->thrust + control->pitch +
-                               control->yaw);
-    motorPower.m2 = limitThrust(control->thrust - control->roll -
-                               control->yaw);
-    motorPower.m3 =  limitThrust(control->thrust - control->pitch +
-                               control->yaw);
-    motorPower.m4 =  limitThrust(control->thrust + control->roll -
-                               control->yaw);
-  #endif
+  // attitude_t attitudeDesired;
+  // float actuatorThrust;
+  // positionController(&actuatorThrust, &attitudeDesired, setpoint, state);
 
-  if (motorSetEnable)
+  double x[12] = {
+      (double)state->position.x,
+      (double)state->position.y,
+      (double)state->position.z,
+      (double)state->attitude.roll / 180 * 3.14159,
+      (double)state->attitude.pitch / 180 * 3.14159,
+      (double)state->attitude.yaw / 180 * 3.14159,
+      (double)state->velocity.x,
+      (double)state->velocity.y,
+      (double)state->velocity.z,
+      (double)sensorData->gyro.x / 180 * 3.14159,
+      (double)sensorData->gyro.y / 180 * 3.14159,
+      (double)sensorData->gyro.z / 180 * 3.14159,
+  };
+  // double xd[12] = {0.1, attitudeDesired.roll, attitudeDesired.pitch, 0, 0, 0, 0, 0};
+  double xd[12] = {0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  double u[4];
+
+  static const double a[48] = {
+      -5.42031522336395E-11, 5.28285658101859E-11,  4.78714870443311E-11,
+      -4.64969006374907E-11, 5.23770986715285E-11,  4.85239631466303E-11,
+      -4.98922458764217E-11, -5.10088159717303E-11, 0.136251652900625,
+      0.136251652898964,     0.136251652900705,     0.136251652898954,
+      -0.137837509305527,    -0.127697435211802,    0.131298262056926,
+      0.134236682460475,     0.142643032059928,     -0.13902561619545,
+      -0.12598034599679,     0.122362930132341,     -0.166318754761903,
+      0.170380581138883,     -0.180246047253006,    0.176184220872694,
+      -1.25550384916621E-6,  1.22366438583222E-6,   1.10884374914901E-6,
+      -1.07700428623403E-6,  1.21320703591205E-6,   1.12395704134225E-6,
+      -1.15565049302598E-6,  -1.18151358519502E-6,  0.0553877711950844,
+      0.0553877711948437,    0.0553877711950973,    0.0553877711948432,
+      -0.0351830958017375,   -0.0323624366537977,   0.0333202309115897,
+      0.0342253015439436,    -0.0365574204424846,   0.0355953176475468,
+      0.0318200540569092,    -0.0308579512619764,   -0.0463173892937005,
+      0.0472859766806133,    -0.0496349272963494,   0.0486663399093464};
+  double b_x[12];
+  double d;
+  int i;
+  int k;
+  for (i = 0; i < 12; i++) {
+    b_x[i] = x[i] - xd[i];
+  }
+  for (k = 0; k < 4; k++) {
+    d = 0.0;
+    for (i = 0; i < 12; i++) {
+      d += a[k + (i << 2)] * b_x[i];
+    }
+    u[k] = (sqrt(1.066330912689E-12 -
+                 8.5211799999999988E-11 *
+                     (0.000548456 - (0.068670000000000009 - d))) +
+            -1.032633E-6) /
+           4.2605899999999994E-11;
+  }
+
+  for (size_t i = 0; i < 4; i++)
   {
-    motorsSetRatio(MOTOR_M1, motorPowerSet.m1);
-    motorsSetRatio(MOTOR_M2, motorPowerSet.m2);
-    motorsSetRatio(MOTOR_M3, motorPowerSet.m3);
-    motorsSetRatio(MOTOR_M4, motorPowerSet.m4);
+    u[i] = limitThrust(u[i]);
+  }
+
+  if (count < 15e3 && count > 5e3)
+  {
+    motorsSetRatio(MOTOR_M1, u[0]);
+    motorsSetRatio(MOTOR_M2, u[1]);
+    motorsSetRatio(MOTOR_M3, u[2]);
+    motorsSetRatio(MOTOR_M4, u[3]);
+
+    motorPower.m1 = u[0];
+    motorPower.m2 = u[1];
+    motorPower.m3 = u[2];
+    motorPower.m4 = u[3];
   }
   else
   {
-    if (motorPower.m1 < idleThrust) {
-      motorPower.m1 = idleThrust;
-    }
-    if (motorPower.m2 < idleThrust) {
-      motorPower.m2 = idleThrust;
-    }
-    if (motorPower.m3 < idleThrust) {
-      motorPower.m3 = idleThrust;
-    }
-    if (motorPower.m4 < idleThrust) {
-      motorPower.m4 = idleThrust;
-    }
+    motorsSetRatio(MOTOR_M1, 0);
+    motorsSetRatio(MOTOR_M2, 0);
+    motorsSetRatio(MOTOR_M3, 0);
+    motorsSetRatio(MOTOR_M4, 0);
 
-    motorsSetRatio(MOTOR_M1, motorPower.m1);
-    motorsSetRatio(MOTOR_M2, motorPower.m2);
-    motorsSetRatio(MOTOR_M3, motorPower.m3);
-    motorsSetRatio(MOTOR_M4, motorPower.m4);
+    motorPower.m1 = 0;
+    motorPower.m2 = 0;
+    motorPower.m3 = 0;
+    motorPower.m4 = 0;
   }
+
+  // motorsSetRatio(MOTOR_M1, 0);
+  // motorsSetRatio(MOTOR_M2, 0);
+  // motorsSetRatio(MOTOR_M3, 0);
+  // motorsSetRatio(MOTOR_M4, 0);
+
+  // motorPower.m1 = u[0];
+  // motorPower.m2 = u[1];
+  // motorPower.m3 = u[2];
+  // motorPower.m4 = u[3];
+
+  count++;
 }
 
 /**
