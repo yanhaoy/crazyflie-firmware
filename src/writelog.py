@@ -1,15 +1,12 @@
 import logging
 import time
 import pickle
-import sys
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.motion_commander import MotionCommander
-
 from cflib.crazyflie.log import LogConfig
-from cflib.crazyflie.syncLogger import SyncLogger
 
 # URI to the Crazyflie to connect to
 uri = 'radio://0/80/2M/E7E7E7E7E7'
@@ -58,7 +55,7 @@ def param_deck_flow(name, value_str):
 
 def take_off_simple(scf):
     with MotionCommander(scf) as mc:
-        time.sleep(15)
+        time.sleep(20)
 
 
 if __name__ == '__main__':
@@ -105,14 +102,15 @@ if __name__ == '__main__':
             log_handle.data_received_cb.add_callback(log_stab_callback)
             log_handle.start()
 
-        time.sleep(15)
-        # if is_deck_attached:
-        #     take_off_simple(scf)
+        # Just record
+        # time.sleep(20)
+
+        # Fly with the default controller and record
+        if is_deck_attached:
+            take_off_simple(scf)
 
         for log_handle in log_set:
             log_handle.stop()
-
-    print(log_dict)
 
     log_file = open(time.strftime("%Y%m%d-%H%M%S"), 'wb')
     pickle.dump(log_dict, log_file)

@@ -259,6 +259,28 @@ static void stabilizerTask(void* param)
       commanderGetSetpoint(&setpoint, &state);
       compressSetpoint();
 
+      // Fly with default controller
+      // setpoint.mode.x = modeVelocity;
+      // setpoint.mode.y = modeVelocity;
+      // setpoint.mode.z = modeVelocity;
+      // setpoint.mode.roll = modeAbs;
+      // setpoint.mode.pitch = modeAbs;
+      // setpoint.mode.yaw = modeVelocity;
+
+      // setpoint.velocity.x = 0.;
+      // setpoint.velocity.y = 0.;
+      // if (state.position.z < 0.3f)
+      // {
+      //   setpoint.velocity.z = 0.2;
+      // }
+      // else
+      // {
+      //   setpoint.velocity.z = -0.2;
+      // }
+      // setpoint.attitude.roll = 0;
+      // setpoint.attitude.pitch = 0;
+      // setpoint.attitudeRate.yaw = 0;
+
       collisionAvoidanceUpdateSetpoint(&setpoint, &sensorData, &state, tick);
 
       controller(&control, &setpoint, &sensorData, &state, tick);
@@ -271,10 +293,16 @@ static void stabilizerTask(void* param)
       //
       supervisorUpdate(&sensorData);
 
-      if (emergencyStop || (systemIsArmed() == false)) {
+      if (emergencyStop || (systemIsArmed() == false))
+      {
         powerStop();
-      } else {
-        powerDistribution(&control, &setpoint, &sensorData, &state);
+      }
+      else
+      {
+        if (RATE_DO_EXECUTE(ATTITUDE_RATE, tick))
+        {
+          powerDistribution(&control, &setpoint, &sensorData, &state);
+        }
       }
 
       // Log data to uSD card if configured
