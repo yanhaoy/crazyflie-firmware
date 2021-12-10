@@ -31,6 +31,9 @@
 void powerDistributionInit(void);
 bool powerDistributionTest(void);
 void powerDistribution(const control_t *control, setpoint_t *setpoint, const sensorData_t *sensorData, const state_t *state);
+void mylqr(const float x[12], const float xd[12], float u[4]);
+void mylqr_pfl(const float x[12], const float xd[12], float u[4]);
+void rot_wb(float x[3], const float rpy[3], const bool inv);
 void powerStop();
 
 

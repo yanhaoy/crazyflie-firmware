@@ -27,6 +27,7 @@
 #define POSITION_CONTROLLER_H_
 
 #include "stabilizer_types.h"
+#include "math3d.h"
 
 // A position controller calculate the thrust, roll, pitch to approach
 // a 3D position setpoint
